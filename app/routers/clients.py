@@ -1,0 +1,84 @@
+"""Client intelligence endpoints"""
+from fastapi import APIRouter, HTTPException, Depends
+from typing import Dict, Any, List
+from app.services.intelligence_service import IntelligenceService
+from app.services.ai_service import AIService
+from app.utils.data_loader import DataLoader
+from app.models.schemas import MeetingBrief
+
+router = APIRouter(prefix="/clients", tags=["clients"])
+
+
+def get_intelligence_service() -> IntelligenceService:
+    """Dependency: Get intelligence service instance"""
+    data_loader = DataLoader()
+    ai_service = AIService()
+    return IntelligenceService(data_loader, ai_service)
+
+
+@router.get("/list")
+async def list_clients(service: IntelligenceService = Depends(get_intelligence_service)) -> List[Dict[str, Any]]:
+    """List all available clients"""
+    sf_data = service.data_loader.load_salesforce_data()
+    accounts = sf_data["accounts"]
+
+    if accounts.empty:
+        return []
+
+    return accounts[["AccountId", "Name", "Industry", "Region", "ESGStatus"]].to_dict(orient="records")
+
+
+@router.get("/{client_name}")
+async def get_client(
+    client_name: str,
+    service: IntelligenceService = Depends(get_intelligence_service)
+) -> Dict[str, Any]:
+    """Get detailed client information"""
+    client_data = service.get_client_info(client_name)
+
+    if not client_data:
+        raise HTTPException(status_code=404, detail=f"Client '{client_name}' not found")
+
+    return client_data
+
+
+@router.post("/{client_name}/meeting-brief")
+async def generate_meeting_brief(
+    client_name: str,
+    service: IntelligenceService = Depends(get_intelligence_service)
+) -> MeetingBrief:
+    """Generate comprehensive meeting preparation brief"""
+    try:
+        brief = service.generate_meeting_brief(client_name)
+        return brief
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating brief: {str(e)}")
+
+
+@router.get("/{client_name}/communications")
+async def search_communications(
+    client_name: str,
+    query: str = None,
+    service: IntelligenceService = Depends(get_intelligence_service)
+) -> Dict[str, Any]:
+    """Search emails and Teams chats for a client"""
+    try:
+        results = service.search_communications(client_name, query)
+        return results
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching communications: {str(e)}")
+
+
+@router.get("/{client_name}/action-items")
+async def get_action_items(
+    client_name: str,
+    service: IntelligenceService = Depends(get_intelligence_service)
+) -> List[Dict[str, Any]]:
+    """Get action items for a client"""
+    try:
+        action_items = service.extract_action_items(client_name)
+        return action_items
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extracting action items: {str(e)}")
