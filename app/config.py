@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     app_name: str = "Meeting Prep Assistant API"
     version: str = "0.1.0"
     debug: bool = True
+    port: int = 30903
+    host: str = "0.0.0.0"
 
     # OpenAI Settings
     openai_api_key: str = ""

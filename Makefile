@@ -50,7 +50,7 @@ help:
 	@echo ""
 
 # API base URL
-API_URL = http://localhost:8000
+API_URL = http://localhost:30903
 
 # Check if API is running
 check-api:
@@ -91,9 +91,9 @@ setup:
 
 run:
 	@echo "🚀 Starting API server..."
-	@echo "📚 API Docs: http://localhost:8000/docs"
+	@echo "📚 API Docs: http://localhost:30903/docs"
 	@echo ""
-	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 30903
 
 test:
 	@echo "🧪 Running setup verification..."
@@ -133,7 +133,7 @@ start:
 		echo "  make demo-brief    # Meeting brief"; \
 		echo "  make demo-kb       # Knowledge Q&A"; \
 		echo ""; \
-		echo "📚 API Docs: $(API_URL)/docs"; \
+		echo "📚 API Docs: http://localhost:30903/docs"; \
 		echo ""; \
 	fi
 
@@ -163,7 +163,7 @@ demo: check-api
 	@echo ""
 	@echo "✅ Demo Complete!"
 	@echo ""
-	@echo "📚 Full API docs: http://localhost:8000/docs"
+	@echo "📚 Full API docs: http://localhost:30903/docs"
 	@echo "💡 Note: Some endpoints need data relationship fixes (see QUICKFIX.md)"
 
 #############################################
@@ -306,7 +306,7 @@ test-all: check-api
 
 dev:
 	@echo "🔧 Starting development server with auto-reload..."
-	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --log-level debug
+	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 30903 --log-level debug
 
 format:
 	@echo "🎨 Formatting code..."

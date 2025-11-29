@@ -20,8 +20,8 @@ if ! grep -q "OPENAI_API_KEY=sk-" .env; then
 fi
 
 # Run the server
-echo "✅ Starting server on http://localhost:8000"
-echo "📚 API Docs: http://localhost:8000/docs"
+echo "✅ Starting server on http://localhost:30903"
+echo "📚 API Docs: http://localhost:30903/docs"
 echo ""
 
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 30903
