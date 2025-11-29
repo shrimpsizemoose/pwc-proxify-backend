@@ -70,7 +70,7 @@ class AIService:
     def generate_meeting_brief(self, client_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate a comprehensive meeting brief"""
         prompt = f"""
-Generate a comprehensive meeting preparation brief for a consultant meeting with {client_data.get('account', {}).get('Name', 'Unknown Client')}.
+Generate a comprehensive meeting preparation brief for a consultant meeting with {client_data.get('account', {}).get('AccountName', 'Unknown Client')}.
 
 CLIENT DATA:
 {self._format_client_data(client_data)}

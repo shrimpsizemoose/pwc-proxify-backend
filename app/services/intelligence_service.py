@@ -40,13 +40,19 @@ class IntelligenceService:
         # Build meeting brief
         account = client_data["account"]
 
+        # Convert client_overview to string if it's a dict
+        client_overview = ai_brief.get("client_overview", "")
+        if isinstance(client_overview, dict):
+            import json
+            client_overview = json.dumps(client_overview, indent=2)
+
         brief = MeetingBrief(
-            client_name=account.get("Name", client_name),
-            client_overview=ai_brief.get("client_overview", ""),
+            client_name=account.get("AccountName", client_name),
+            client_overview=client_overview,
             key_contacts=[
                 {
-                    "name": c.get("Name", ""),
-                    "role": c.get("Role", ""),
+                    "name": f"{c.get('FirstName', '')} {c.get('LastName', '')}".strip(),
+                    "role": c.get("Title", ""),
                     "email": c.get("Email", ""),
                 }
                 for c in client_data.get("contacts", [])[:5]
@@ -54,7 +60,7 @@ class IntelligenceService:
             open_opportunities=[
                 {
                     "name": o.get("Name", ""),
-                    "stage": o.get("Stage", ""),
+                    "stage": o.get("StageName", ""),
                     "amount": o.get("Amount", 0),
                     "probability": o.get("Probability", 0),
                 }
@@ -64,7 +70,7 @@ class IntelligenceService:
                 {
                     "type": a.get("Type", ""),
                     "subject": a.get("Subject", ""),
-                    "date": str(a.get("ActivityDate", "")),
+                    "date": str(a.get("Timestamp", "")),
                 }
                 for a in client_data.get("activities", [])[:10]
             ],
@@ -86,15 +92,18 @@ class IntelligenceService:
         relevant_news = []
 
         for item in news_feed:
-            # Check if client name appears in title or summary
-            title = item.get("title", "")
-            summary = item.get("summary", "")
+            # Check if client name appears in headline or tags
+            headline = item.get("headline", "")
+            tags = item.get("tags", [])
 
-            if client_name.lower() in title.lower() or client_name.lower() in summary.lower():
+            # Convert tags list to string for searching
+            tags_str = " ".join(tags) if isinstance(tags, list) else ""
+
+            if client_name.lower() in headline.lower() or client_name.lower() in tags_str.lower():
                 relevant_news.append(
                     NewsItem(
-                        title=title,
-                        summary=summary,
+                        title=headline,
+                        summary=f"{item.get('impact', '')} impact",
                         date=item.get("date", ""),
                         source=item.get("source", ""),
                         relevance_score=1.0,
@@ -113,9 +122,9 @@ class IntelligenceService:
         for item in regulatory_feed[:5]:  # Top 5 recent
             regulatory_items.append(
                 NewsItem(
-                    title=item.get("title", ""),
+                    title=item.get("regulation", ""),
                     summary=item.get("summary", ""),
-                    date=item.get("deadline", item.get("date", "")),
+                    date=item.get("deadline", ""),
                     source="Regulatory Feed",
                 )
             )

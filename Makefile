@@ -35,13 +35,21 @@ help:
 	@echo "  make ex-docs-list  - List documents"
 	@echo "  make ex-docs-sum   - Get document summaries"
 	@echo ""
-	@echo "Docker:"
-	@echo "  make docker-build  - Build Docker image"
-	@echo "  make docker-run    - Run with Docker Compose"
-	@echo "  make docker-stop   - Stop Docker containers"
-	@echo "  make docker-logs   - View Docker logs"
-	@echo "  make docker-shell  - Open shell in container"
-	@echo "  make docker-clean  - Remove Docker containers and images"
+	@echo "Docker (Local Build):"
+	@echo "  make docker-build    - Build Docker image locally"
+	@echo "  make docker-run      - Run with Docker Compose (local build)"
+	@echo "  make docker-stop     - Stop Docker containers"
+	@echo "  make docker-logs     - View Docker logs"
+	@echo ""
+	@echo "Docker (GitHub Container Registry):"
+	@echo "  make docker-pull       - Pull latest image from GHCR"
+	@echo "  make docker-run-ghcr   - Run with pre-built GHCR image"
+	@echo "  make docker-stop-ghcr  - Stop GHCR containers"
+	@echo "  make docker-logs-ghcr  - View GHCR container logs"
+	@echo ""
+	@echo "Docker (Other):"
+	@echo "  make docker-shell    - Open shell in container"
+	@echo "  make docker-clean    - Remove Docker containers and images"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make health        - Check API health"
@@ -327,7 +335,7 @@ docker-build:
 	@echo "✅ Docker image built!"
 
 docker-run:
-	@echo "🐳 Starting with Docker Compose..."
+	@echo "🐳 Starting with Docker Compose (local build)..."
 	@if [ ! -f .env ]; then \
 		echo "⚠️  .env file not found. Creating from template..."; \
 		cp .env.example .env; \
@@ -335,20 +343,59 @@ docker-run:
 		exit 1; \
 	fi
 	docker compose up -d
-	@echo "✅ API running at http://localhost:8000"
-	@echo "📚 API Docs at http://localhost:8000/docs"
+	@echo "✅ API running at http://localhost:30903"
+	@echo "📚 API Docs at http://localhost:30903/docs"
 	@echo ""
 	@echo "View logs: make docker-logs"
 	@echo "Stop: make docker-stop"
+
+docker-run-ghcr:
+	@echo "🐳 Starting with pre-built image from GitHub Container Registry..."
+	@if [ ! -f .env ]; then \
+		echo "⚠️  .env file not found. Creating from template..."; \
+		cp .env.example .env; \
+		echo "📝 Please edit .env and add your OPENAI_API_KEY"; \
+		exit 1; \
+	fi
+	@if ! grep -q "^GITHUB_REPOSITORY=" .env; then \
+		echo "⚠️  GITHUB_REPOSITORY not set in .env"; \
+		echo "📝 Add: GITHUB_REPOSITORY=your-username/meeting-prep-backend"; \
+		exit 1; \
+	fi
+	docker compose -f docker-compose.ghcr.yml up -d
+	@echo "✅ API running at http://localhost:30903"
+	@echo "📚 API Docs at http://localhost:30903/docs"
+	@echo ""
+	@echo "View logs: make docker-logs-ghcr"
+	@echo "Stop: make docker-stop-ghcr"
+
+docker-pull:
+	@echo "📥 Pulling latest image from GitHub Container Registry..."
+	@if ! grep -q "^GITHUB_REPOSITORY=" .env 2>/dev/null; then \
+		echo "⚠️  GITHUB_REPOSITORY not set in .env"; \
+		echo "📝 Add: GITHUB_REPOSITORY=your-username/meeting-prep-backend"; \
+		exit 1; \
+	fi
+	@. .env && docker pull ghcr.io/$${GITHUB_REPOSITORY}:$${IMAGE_TAG:-latest}
+	@echo "✅ Image pulled!"
 
 docker-stop:
 	@echo "🛑 Stopping Docker containers..."
 	docker compose down
 	@echo "✅ Containers stopped!"
 
+docker-stop-ghcr:
+	@echo "🛑 Stopping Docker containers (GHCR)..."
+	docker compose -f docker-compose.ghcr.yml down
+	@echo "✅ Containers stopped!"
+
 docker-logs:
 	@echo "📋 Viewing Docker logs (Ctrl+C to exit)..."
 	docker compose logs -f
+
+docker-logs-ghcr:
+	@echo "📋 Viewing Docker logs (GHCR) (Ctrl+C to exit)..."
+	docker compose -f docker-compose.ghcr.yml logs -f
 
 docker-shell:
 	@echo "🐚 Opening shell in container..."

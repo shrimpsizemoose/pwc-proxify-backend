@@ -1,0 +1,52 @@
+services:
+  api:
+    # Use pre-built image from GitHub Container Registry
+    # Replace YOUR_GITHUB_USERNAME with your actual GitHub username
+    # Example: ghcr.io/username/meeting-prep-backend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/meeting-prep-backend}:${IMAGE_TAG:-latest}
+    container_name: meeting-prep-api
+    ports:
+      - "30903:30903"
+    environment:
+      # OpenAI Configuration (override in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+
+      # App Configuration
+      - DEBUG=${DEBUG:-false}
+      - PORT=${PORT:-30903}
+      - HOST=${HOST:-0.0.0.0}
+
+    volumes:
+      # Mount data directory for persistent cache
+      - ./data:/app/data
+
+      # Mount data sources (read-only)
+      - ../hackathon_fake_salesforce:/data/hackathon_fake_salesforce:ro
+      - ../hackathon_fake_sharepoint_news:/data/hackathon_fake_sharepoint_news:ro
+      - ../hackathon_extra_calendar_knowledge_regulatory:/data/hackathon_extra_calendar_knowledge_regulatory:ro
+      - ../hackathon_fake_mail_teams:/data/hackathon_fake_mail_teams:ro
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30903/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - meeting-prep-network
+
+networks:
+  meeting-prep-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

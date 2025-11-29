@@ -179,7 +179,9 @@ class DataLoader:
 
         try:
             with open(news_path, "r") as f:
-                news = json.load(f)
+                data = json.load(f)
+                # Extract items array from JSON structure
+                news = data.get("items", []) if isinstance(data, dict) else data
         except Exception as e:
             print(f"Error loading news feed: {e}")
             news = []
@@ -201,7 +203,9 @@ class DataLoader:
 
         try:
             with open(reg_path, "r") as f:
-                regulatory = json.load(f)
+                data = json.load(f)
+                # Extract updates array from JSON structure
+                regulatory = data.get("updates", []) if isinstance(data, dict) else data
         except Exception as e:
             print(f"Error loading regulatory feed: {e}")
             regulatory = []
@@ -293,13 +297,15 @@ class DataLoader:
             else []
         )
 
-        # Get related activities
+        # Get related activities (join through opportunities)
         activities = sf_data["activities"]
-        client_activities = (
-            activities[activities["AccountId"] == account_id].to_dict(orient="records")
-            if not activities.empty
-            else []
-        )
+        if not activities.empty and client_opps:
+            # Get list of opportunity IDs for this client
+            opp_ids = [opp["OpportunityId"] for opp in client_opps]
+            # Filter activities by opportunity IDs
+            client_activities = activities[activities["OpportunityId"].isin(opp_ids)].to_dict(orient="records")
+        else:
+            client_activities = []
 
         return {
             "account": account.to_dict(orient="records")[0],
