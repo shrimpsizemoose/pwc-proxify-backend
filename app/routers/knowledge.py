@@ -12,7 +12,9 @@ router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 def get_knowledge_service() -> KnowledgeService:
     """Dependency: Get knowledge service instance"""
     try:
-        data_loader = DataLoader()
+        from app.config import get_settings
+        settings = get_settings()
+        data_loader = DataLoader(base_path=settings.data_path)
         ai_service = AIService()
         return KnowledgeService(data_loader, ai_service)
     except Exception as e:

@@ -12,7 +12,9 @@ router = APIRouter(prefix="/clients", tags=["clients"])
 def get_intelligence_service() -> IntelligenceService:
     """Dependency: Get intelligence service instance"""
     try:
-        data_loader = DataLoader()
+        from app.config import get_settings
+        settings = get_settings()
+        data_loader = DataLoader(base_path=settings.data_path)
         ai_service = AIService()
         return IntelligenceService(data_loader, ai_service)
     except Exception as e:
@@ -22,13 +24,19 @@ def get_intelligence_service() -> IntelligenceService:
 @router.get("/list")
 async def list_clients(service: IntelligenceService = Depends(get_intelligence_service)) -> List[Dict[str, Any]]:
     """List all available clients"""
+    from app.config import get_settings
+    settings = get_settings()
+
     sf_data = service.data_loader.load_salesforce_data()
     accounts = sf_data["accounts"]
 
     if accounts.empty:
         return []
 
-    return accounts[["AccountId", "AccountName", "Industry", "Region", "ESGDisclosureStatus"]].to_dict(orient="records")
+    result = accounts[["AccountId", "AccountName", "Industry", "Region", "ESGDisclosureStatus"]].to_dict(orient="records")
+    for client in result:
+        client["logo_url"] = f"{settings.logo_base_url}/{client['AccountId']}.png"
+    return result
 
 
 @router.get("/{client_name}")
@@ -37,10 +45,18 @@ async def get_client(
     service: IntelligenceService = Depends(get_intelligence_service)
 ) -> Dict[str, Any]:
     """Get detailed client information"""
+    from app.config import get_settings
+    settings = get_settings()
+
     client_data = service.get_client_info(client_name)
 
     if not client_data:
         raise HTTPException(status_code=404, detail=f"Client '{client_name}' not found")
+
+    if client_data.get("account"):
+        account_id = client_data["account"].get("AccountId")
+        if account_id:
+            client_data["account"]["logo_url"] = f"{settings.logo_base_url}/{account_id}.png"
 
     return client_data
 

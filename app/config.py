@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     sharepoint_path: str = "../hackathon_fake_sharepoint_news"
     calendar_path: str = "../hackathon_extra_calendar_knowledge_regulatory"
 
+    # Logo URL base path
+    logo_base_url: str = "https://pwc-proxify.mock.events/clients-logos"
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

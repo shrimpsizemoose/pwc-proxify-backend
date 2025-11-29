@@ -179,9 +179,9 @@ demo: check-api
 #############################################
 
 demo-brief: check-api
-	@echo "📋 Generating Meeting Brief for GreenTech..."
+	@echo "📋 Generating Meeting Brief for Nordic Motors..."
 	@echo ""
-	@curl -s -X POST $(API_URL)/clients/GreenTech/meeting-brief | jq
+	@curl -s -X POST "$(API_URL)/clients/Nordic%20Motors/meeting-brief" | jq
 
 demo-clients: check-api
 	@echo "📊 Listing All Clients..."
@@ -189,19 +189,19 @@ demo-clients: check-api
 	@curl -s $(API_URL)/clients/list | jq
 
 demo-client: check-api
-	@echo "🏢 GreenTech Client Details..."
+	@echo "🏢 Nordic Motors Client Details..."
 	@echo ""
-	@curl -s $(API_URL)/clients/GreenTech | jq
+	@curl -s "$(API_URL)/clients/Nordic%20Motors" | jq
 
 demo-comms: check-api
-	@echo "💬 Searching GreenTech Communications..."
+	@echo "💬 Searching Nordic Motors Communications..."
 	@echo ""
-	@curl -s "$(API_URL)/clients/GreenTech/communications" | jq
+	@curl -s "$(API_URL)/clients/Nordic%20Motors/communications" | jq
 
 demo-actions: check-api
-	@echo "✅ GreenTech Action Items..."
+	@echo "✅ Nordic Motors Action Items..."
 	@echo ""
-	@curl -s $(API_URL)/clients/GreenTech/action-items | jq
+	@curl -s "$(API_URL)/clients/Nordic%20Motors/action-items" | jq
 
 demo-kb: check-api
 	@echo "🧠 Asking Knowledge Base about ESG Audits..."

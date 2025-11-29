@@ -131,7 +131,17 @@ class DataLoader:
                     "paragraphs": len(doc.paragraphs),
                 })
             except Exception as e:
-                print(f"Error parsing {docx_file}: {e}")
+                # Fallback: try reading as plain text
+                try:
+                    with open(docx_file, "r", encoding="utf-8") as f:
+                        text = f.read()
+                    docs["docx"].append({
+                        "file": docx_file.name,
+                        "content": text,
+                        "paragraphs": len(text.split("\n")),
+                    })
+                except:
+                    print(f"Error parsing {docx_file}: {e}")
 
         # Parse XLSX files
         for xlsx_file in sp_path.glob("*.xlsx"):
@@ -143,7 +153,16 @@ class DataLoader:
                     "columns": list(df.columns),
                 })
             except Exception as e:
-                print(f"Error parsing {xlsx_file}: {e}")
+                # Fallback: try reading as CSV
+                try:
+                    df = pd.read_csv(xlsx_file)
+                    docs["xlsx"].append({
+                        "file": xlsx_file.name,
+                        "data": df.to_dict(orient="records"),
+                        "columns": list(df.columns),
+                    })
+                except:
+                    print(f"Error parsing {xlsx_file}: {e}")
 
         # Parse PPTX files
         for pptx_file in sp_path.glob("*.pptx"):
@@ -163,7 +182,18 @@ class DataLoader:
                     "slide_count": len(prs.slides),
                 })
             except Exception as e:
-                print(f"Error parsing {pptx_file}: {e}")
+                # Fallback: try reading as plain text
+                try:
+                    with open(pptx_file, "r", encoding="utf-8") as f:
+                        text = f.read()
+                    slides = [s.strip() for s in text.split("Slide ") if s.strip()]
+                    docs["pptx"].append({
+                        "file": pptx_file.name,
+                        "slides": slides,
+                        "slide_count": len(slides),
+                    })
+                except:
+                    print(f"Error parsing {pptx_file}: {e}")
 
         self._cache["sharepoint"] = docs
         return docs

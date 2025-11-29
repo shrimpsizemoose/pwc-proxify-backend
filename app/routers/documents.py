@@ -11,7 +11,9 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 def get_intelligence_service() -> IntelligenceService:
     """Dependency: Get intelligence service instance"""
     try:
-        data_loader = DataLoader()
+        from app.config import get_settings
+        settings = get_settings()
+        data_loader = DataLoader(base_path=settings.data_path)
         ai_service = AIService()
         return IntelligenceService(data_loader, ai_service)
     except Exception as e:
