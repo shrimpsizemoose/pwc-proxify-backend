@@ -10,9 +10,13 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 
 def get_intelligence_service() -> IntelligenceService:
     """Dependency: Get intelligence service instance"""
-    data_loader = DataLoader()
-    ai_service = AIService()
-    return IntelligenceService(data_loader, ai_service)
+    try:
+        data_loader = DataLoader()
+        ai_service = AIService()
+        return IntelligenceService(data_loader, ai_service)
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to initialize document service: {str(e)}")
 
 
 @router.get("/summaries")

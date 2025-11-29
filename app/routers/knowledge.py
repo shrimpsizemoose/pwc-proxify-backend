@@ -11,9 +11,13 @@ router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 
 def get_knowledge_service() -> KnowledgeService:
     """Dependency: Get knowledge service instance"""
-    data_loader = DataLoader()
-    ai_service = AIService()
-    return KnowledgeService(data_loader, ai_service)
+    try:
+        data_loader = DataLoader()
+        ai_service = AIService()
+        return KnowledgeService(data_loader, ai_service)
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to initialize knowledge service: {str(e)}")
 
 
 @router.get("/topics")

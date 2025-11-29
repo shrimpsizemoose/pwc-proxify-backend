@@ -270,7 +270,7 @@ class DataLoader:
         if accounts.empty:
             return None
 
-        account = accounts[accounts["Name"].str.contains(client_name, case=False, na=False)]
+        account = accounts[accounts["AccountName"].str.contains(client_name, case=False, na=False)]
 
         if account.empty:
             return None

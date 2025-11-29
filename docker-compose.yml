@@ -1,0 +1,50 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: meeting-prep-api
+    image: meeting-prep-assistant:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # OpenAI Configuration (override in .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+
+      # App Configuration
+      - DEBUG=${DEBUG:-false}
+
+    volumes:
+      # Mount data directory for persistent cache
+      - ./data:/app/data
+
+      # Mount data sources (read-only)
+      - ../hackathon_fake_salesforce:/data/hackathon_fake_salesforce:ro
+      - ../hackathon_fake_sharepoint_news:/data/hackathon_fake_sharepoint_news:ro
+      - ../hackathon_extra_calendar_knowledge_regulatory:/data/hackathon_extra_calendar_knowledge_regulatory:ro
+      - ../hackathon_fake_mail_teams:/data/hackathon_fake_mail_teams:ro
+
+    env_file:
+      - .env
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    networks:
+      - meeting-prep-network
+
+networks:
+  meeting-prep-network:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

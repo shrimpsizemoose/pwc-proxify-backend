@@ -8,6 +8,24 @@
 
 ## Setup (2 minutes)
 
+### Option 1: Using Makefile (Recommended)
+
+```bash
+cd meeting-prep-backend
+
+# 1. Install dependencies
+make install
+
+# 2. Configure environment
+make setup
+nano .env  # Add your OPENAI_API_KEY
+
+# 3. Verify setup
+make test
+```
+
+### Option 2: Manual Setup
+
 ```bash
 cd meeting-prep-backend
 
@@ -25,7 +43,10 @@ uv run python test_setup.py
 ## Run (1 minute)
 
 ```bash
-# Start the API
+# Using Makefile
+make run
+
+# Or using run script
 ./run.sh
 
 # Or manually
@@ -43,7 +64,22 @@ Server starts at: http://localhost:8000
 3. Enter: `GreenTech`
 4. Click "Execute"
 
-### Option 2: Command Line
+### Option 2: Makefile Commands (Easiest!)
+
+```bash
+# See all available commands
+make help
+
+# Run complete demo flow
+make demo
+
+# Or try individual demos
+make demo-brief     # Generate meeting brief
+make demo-kb        # Ask knowledge base
+make demo-clients   # List all clients
+```
+
+### Option 3: Command Line (curl)
 
 ```bash
 # Generate meeting brief
@@ -131,6 +167,22 @@ Backend API (FastAPI)
 ## Demo Script
 
 **Scenario**: Consultant preparing for GreenTech meeting
+
+### Using Makefile (Super Easy!)
+
+```bash
+# Complete automated demo
+make demo
+
+# Or step by step
+make demo-clients   # 1. Show client list
+make demo-client    # 2. Get client info
+make demo-brief     # 3. Generate brief
+make demo-kb        # 4. Ask about ESG
+make demo-docs      # 5. Show documents
+```
+
+### Using curl commands
 
 1. **Show client list**: `GET /clients/list`
 2. **Get client info**: `GET /clients/GreenTech`

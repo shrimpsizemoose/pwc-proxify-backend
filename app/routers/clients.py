@@ -11,9 +11,12 @@ router = APIRouter(prefix="/clients", tags=["clients"])
 
 def get_intelligence_service() -> IntelligenceService:
     """Dependency: Get intelligence service instance"""
-    data_loader = DataLoader()
-    ai_service = AIService()
-    return IntelligenceService(data_loader, ai_service)
+    try:
+        data_loader = DataLoader()
+        ai_service = AIService()
+        return IntelligenceService(data_loader, ai_service)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to initialize services: {str(e)}")
 
 
 @router.get("/list")
@@ -25,7 +28,7 @@ async def list_clients(service: IntelligenceService = Depends(get_intelligence_s
     if accounts.empty:
         return []
 
-    return accounts[["AccountId", "Name", "Industry", "Region", "ESGStatus"]].to_dict(orient="records")
+    return accounts[["AccountId", "AccountName", "Industry", "Region", "ESGDisclosureStatus"]].to_dict(orient="records")
 
 
 @router.get("/{client_name}")

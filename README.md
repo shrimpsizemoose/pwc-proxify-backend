@@ -20,33 +20,39 @@ Backend API for helping consultants prepare for client meetings by aggregating i
 
 ## Quick Start
 
-### 1. Setup
+### Option 1: Using Docker (Recommended for Quick Demo)
 
 ```bash
-# Clone/navigate to project
-cd meeting-prep-backend
+# 1. Setup
+make setup
+nano .env  # Add OPENAI_API_KEY
 
-# Copy environment file
-cp .env.example .env
+# 2. Build and run
+make docker-build
+make docker-run
 
-# Edit .env and add your OpenAI API key
-nano .env
+# 3. Access
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
+
+# 4. Test
+make demo
 ```
 
-### 2. Install Dependencies
+See [DOCKER.md](DOCKER.md) for detailed Docker instructions.
+
+### Option 2: Using uv (For Development)
 
 ```bash
-# Using uv (recommended)
+# 1. Setup
+cd meeting-prep-backend
+cp .env.example .env
+nano .env  # Add your OpenAI API key
+
+# 2. Install Dependencies
 uv sync
 
-# Or using pip
-pip install -r requirements.txt
-```
-
-### 3. Run the API
-
-```bash
-# Using uv
+# 3. Run the API
 uv run uvicorn app.main:app --reload
 
 # Or directly
